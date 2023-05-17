@@ -1,4 +1,4 @@
-import { Component, Input, Output, inject } from '@angular/core';
+import { Component, Input, Output, SimpleChanges, inject } from '@angular/core';
 import { FormGroup, FormArray, FormBuilder, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Customer, Order } from '../models';
 import { Subject } from 'rxjs';
@@ -15,7 +15,9 @@ export class FormComponent {
   customerForm!: FormGroup
   primaryPayment!: FormGroup
   paymentArray!: FormArray
-  customer!: Customer
+  
+  @Input()
+  customer: Customer| null = null
 
   //@Autorwire
   fb:FormBuilder = inject(FormBuilder)
@@ -30,7 +32,7 @@ export class FormComponent {
     // this.customerForm = this.createForm()
 
     //with form builder (day32, pg8)
-    this.customerForm = this.createFormWithFormBuilder()
+    this.customerForm = this.createFormWithFormBuilder(this.customer)
 
     // to retrieve info form from browser storage if it exists
     // or sessionStorage
@@ -42,6 +44,13 @@ export class FormComponent {
       console.info('>> customer from storage', this.customer)
     }
    
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const c = changes['customer']
+    if (c.firstChange)
+      return
+    this.customerForm = this.createFormWithFormBuilder(c.currentValue as Customer);
   }
 
   processForm(){
@@ -101,31 +110,31 @@ export class FormComponent {
   }
 
   //method 1
-  private createFormWithFormBuilder(): FormGroup{
+  private createFormWithFormBuilder(c:Customer|null): FormGroup{
     this.paymentArray=this.fb.array([])
     this.primaryPayment = this.fb.group({
-      provider: this.fb.control<string>('', [Validators.required, Validators.minLength(1)]),
-      cardNumber: this.fb.control<string>('', [Validators.required,Validators.minLength(5), FormComponent.cardNumberValidator])
+      provider: this.fb.control<string>(!!c? c.payment.provider:'', [Validators.required, Validators.minLength(1)]),
+      cardNumber: this.fb.control<string>(!!c? c.payment.cardNumber:'', [Validators.required,Validators.minLength(5), FormComponent.cardNumberValidator])
     });
    
     return this.fb.group({
-      name: this.fb.control<string>('',[Validators.required, Validators.minLength(5)]),
-      email: this.fb.control<string>('', [Validators.required, Validators.minLength(5)]),
-      dob: this.fb.control('', [Validators.required, this.dateOfBirthValidator]),
-      address: this.fb.control<string>('', [Validators.required, Validators.minLength(5)]),
+      name: this.fb.control<string>(!!c? c.name:'',[Validators.required, Validators.minLength(5)]),
+      email: this.fb.control<string>(!!c? c.email:'', [Validators.required, Validators.minLength(5)]),
+      dob: this.fb.control(!!c? c.dob:'', [Validators.required, this.dateOfBirthValidator]),
+      address: this.fb.control<string>(!!c? c.address:'', [Validators.required, Validators.minLength(5)]),
       payment: this.primaryPayment,
       //payment fields are an array of payment methods
       otherPaymentMethods: this.paymentArray
     })
   }
 
-  get value(): Customer | null {
+  get value(): Customer|null  {
     return this.customerForm.value as Customer
   }
   //needed for this.taskComp.value = this.todo in app.component
-  set value(c: Customer | null) {
-    this.customer!= c
-    this.customerForm = this.createFormWithFormBuilder();
+  set value(c: Customer|null) {
+    this.customer= c
+    this.customerForm = this.createFormWithFormBuilder(c);
   }
 
   //user >= 12 y.o.

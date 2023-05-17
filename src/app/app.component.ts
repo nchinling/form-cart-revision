@@ -79,13 +79,39 @@ export class AppComponent {
     };
   
     this.orders.push(newOrder);
+    this.cart = [];
     console.info('>>>>new order: ', newOrder)
   }
 
-  
   selectedOrder(order: Order) {
     this.order = order
     console.info('>> selected Order: ', this.order)
+    const cust = this.order.customer
+    const cartItem = this.order.cartItem
+    console.info('>> selected Customer: ', cust)
+    console.info('>> selected cartItem: ', cartItem)
+    this.customer = cust
+    this.cart = cartItem
+
+  }
+
+  editOrder(order: Order){
+
+  }
+
+  deleteOrder() {
+    const name = this.formComp.customerForm.get('name')?.value;
+  
+    if (name !== null) {
+      const index = this.orders.findIndex(order => order.customer.name === name);
+      if (index !== -1) {
+        const deletedOrder = this.orders.splice(index, 1)[0];
+        console.info('>>> Order deleted:', deletedOrder);
+        this.formComp.customerForm.reset(); // Clear the form values
+      }
+    } else {
+      console.log('>>> It is null');
+    }
   }
 
 
