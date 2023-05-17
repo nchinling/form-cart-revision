@@ -1,0 +1,10 @@
+<h2>Our Products</h2>
+
+<div *ngFor="let item of items; let i = index">
+    <img src ="/assets/images/{{item}}.jpg" width="80">
+    <button type="button" (click)="dec(i)"> - </button>
+    <button type="button" (click)="inc(i)"> + </button>
+    <!-- {{f | uppercase }} -->
+    {{item }}
+</div>
+

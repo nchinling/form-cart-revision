@@ -1,0 +1,121 @@
+<h2>Place your order</h2>
+
+<form [formGroup]="customerForm" (submit)="processForm()">
+    <table>
+        <tr>
+            <td>Name:</td>
+            <td>
+                <!-- [formControlName]="nameField" is using referencing a variable approach -->
+                <input type="text" size ="30" placeholder="Name" formControlName="name">
+                <span *ngIf="invalidField('name')" class="error">
+                    Please enter a valid name.
+                </span>
+            </td>
+        </tr><br>
+        <tr>
+            <td>Email:</td>
+            <td>
+                <input type="email" size ="30" placeholder="Email" formControlName="email">
+                <span *ngIf="invalidField('email')" class="error">
+                    Please enter a valid email
+                </span>
+            </td>
+        </tr><br>
+        <tr>
+            <td>Date of Birth:</td>
+            <td>
+              <input type="date" size="5" placeholder="Date of Birth"  formControlName="dob">
+              <span *ngIf="invalidField('dob')" class="error">
+                You have to be at least 12 years old
+              </span>
+            </td>
+        </tr><br>
+        <tr>
+            <td>Address:</td>
+            <td>
+                <!-- [formControlName]="nameField" is using referencing a variable approach -->
+                <input type="text" size ="40" placeholder="Address" formControlName="address">
+                <span *ngIf="invalidField('address')" class="error">
+                    Please enter a valid address.
+                </span>
+            </td>
+        </tr><br>
+        
+            <tr>
+                
+                <td>Payment</td>
+                <td>
+                    <div formGroupName="payment">
+                        <select formControlName="provider">
+                            <option value="" disabled="true">Select</option>
+                            <option value="paynow">PayNow</option>
+                            <option value="visa">Visa</option>
+                            <option value="masters">Masters</option>
+                            <option value="amex">Amex</option>
+                        </select>
+                        <input type="text" size="25" placeholder="credit card number" formControlName="cardNumber" style="margin-left: 10px;">
+                        <span *ngIf="invalidCardField('payment.cardNumber')" class="error">
+                            Please provide a valid card number
+                        </span>
+                    </div>
+
+                </td>
+
+            </tr>
+
+            <td></td>
+            <td>
+                <button type="button" (click)="addAPayment()">Add Payment</button>
+            </td><br>
+
+    </table><br>
+
+    <!-- payment array can be empty row -->
+    <table *ngIf="paymentArray.length> 0 else optionalPayment">
+        <thead>
+            <tr>
+                <td>Provider</td>
+                <td>Card Number</td>
+            </tr>
+        </thead>
+        <tbody formArrayName="otherPaymentMethods">
+            <!-- factsArray.controls is used to access the array of controls 
+            within the factsArray FormArray -->
+
+
+            <tr *ngFor="let f of paymentArray.controls; let i = index" [formGroupName]="i">
+                <td>
+                    <select formControlName="altProviders">
+                        <option value="" disabled="true">Select</option>
+                        <option value="paynow">PayNow</option>
+                        <option value="visa">Visa</option>
+                        <option value="masters">Masters</option>
+                        <option value="amex">Amex</option>
+                    </select>
+                    <input type=text size="25" placeholder="credit card number" formControlName="nums" 
+                    style="margin-left: 10px;">
+                    <span *ngIf="invalidField('nums')">
+                      Please provide a valid card number
+                    </span>
+                </td>
+                <td>
+                    <button type="button" (click)="removePaymentMethod(i)"> X </button>
+                </td>
+            </tr> 
+
+            
+        </tbody>
+    </table>
+    <tr><br>
+
+        <td></td>
+        <td style="padding-bottom: 50px;">
+            <button type="submit" [disabled]="invalidForm()">Submit Order</button>
+        </td>
+    </tr>
+</form>
+
+<ng-template #optionalPayment>
+    <p>You may provide more than 1 payment method</p>
+</ng-template>
+
