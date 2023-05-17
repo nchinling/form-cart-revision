@@ -92,7 +92,6 @@ export class AppComponent {
     console.info('>> selected cartItem: ', cartItem)
     this.customer = cust
     this.cart = cartItem
-
   }
 
   editOrder(order: Order){
