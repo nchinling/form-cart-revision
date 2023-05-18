@@ -1,6 +1,6 @@
 import { Component, Input, Output, SimpleChanges, inject } from '@angular/core';
 import { FormGroup, FormArray, FormBuilder, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Customer, Order } from '../models';
+import { Customer, Order, Payment } from '../models';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -83,17 +83,34 @@ export class FormComponent {
     //create a group and push it into array
     // const arr = this.customerForm.get('facts') as FormArray
     this.paymentArray.push(
-      this.createPaymentMethod()
+      this.createPaymentMethod(null)
+     
     )
+  }
+
+  private createMorePayments(otherPaymentMethods: Payment[]): FormArray {
+    console.info('>>> Other Payment methods: ',otherPaymentMethods )
+    return this.fb.array(
+      otherPaymentMethods.map(p => this.createPaymentMethod(p))
+      
+    )
+  }
+  private createPayment(p: Payment | null): FormGroup {
+    console.info('>>> payment: ',p )
+    return this.fb.group({
+      nums: this.fb.control<string>(!!p? p.nums: ''),
+      altProvider: this.fb.control<string>(!!p? p.altProvider: '')
+    
+    })
   }
 
   //initialise empty row
   //use Validators.required too since shouldn't be empty
-  private createPaymentMethod():FormGroup{
+  private createPaymentMethod(p: Payment | null):FormGroup{
+    console.info('>>> payment: ',p )
     return this.fb.group({
-      nums: this.fb.control<string>('',
-      [Validators.minLength(5)]),
-      altProviders: this.fb.control<string>('', [Validators.minLength(1)])
+      nums: this.fb.control<string>(!!p? p.nums:''),
+      altProvider: this.fb.control<string>(!!p? p.altProvider:'', [Validators.minLength(1)])
       // nums: this.fb.control<string>(''),
       // altProviders: this.fb.control<string>('')
     })
@@ -111,12 +128,13 @@ export class FormComponent {
 
   //method 1
   private createFormWithFormBuilder(c:Customer|null): FormGroup{
-    this.paymentArray=this.fb.array([])
+    // this.paymentArray=this.fb.array(!!c?c.otherPaymentMethods:[])
+    this.paymentArray=this.createMorePayments(!!c?c.otherPaymentMethods:[])
     this.primaryPayment = this.fb.group({
       provider: this.fb.control<string>(!!c? c.payment.provider:'', [Validators.required, Validators.minLength(1)]),
       cardNumber: this.fb.control<string>(!!c? c.payment.cardNumber:'', [Validators.required,Validators.minLength(5), FormComponent.cardNumberValidator])
     });
-   
+    console.info('>>> selected Customer in form: ', c)
     return this.fb.group({
       name: this.fb.control<string>(!!c? c.name:'',[Validators.required, Validators.minLength(5)]),
       email: this.fb.control<string>(!!c? c.email:'', [Validators.required, Validators.minLength(5)]),
@@ -127,6 +145,8 @@ export class FormComponent {
       otherPaymentMethods: this.paymentArray
     })
   }
+
+
 
   get value(): Customer|null  {
     return this.customerForm.value as Customer

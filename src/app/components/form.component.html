@@ -86,7 +86,7 @@
 
             <tr *ngFor="let f of paymentArray.controls; let i = index" [formGroupName]="i">
                 <td>
-                    <select formControlName="altProviders">
+                    <select formControlName="altProvider">
                         <option value="" disabled="true">Select</option>
                         <option value="paynow">PayNow</option>
                         <option value="visa">Visa</option>
